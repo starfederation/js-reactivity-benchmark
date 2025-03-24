@@ -1,3 +1,8 @@
+import { nextTick } from "../util/asyncUtil";
+import { fastestTest } from "../util/benchRepeat";
+import type { PerfResultCallback } from "../util/perfLogging";
+import { possiblelyGC } from "../util/perfTests";
+import type { ReactiveFramework } from "../util/reactiveFramework";
 import { avoidablePropagation } from "./kairo/avoidable";
 import { broadPropagation } from "./kairo/broad";
 import { deepPropagation } from "./kairo/deep";
@@ -6,10 +11,6 @@ import { mux } from "./kairo/mux";
 import { repeatedObservers } from "./kairo/repeated";
 import { triangle } from "./kairo/triangle";
 import { unstable } from "./kairo/unstable";
-import { nextTick } from "../util/asyncUtil";
-import { fastestTest } from "../util/benchRepeat";
-import { ReactiveFramework } from "../util/reactiveFramework";
-import { PerfResultCallback } from "../util/perfLogging";
 
 const cases = [
   avoidablePropagation,
@@ -45,11 +46,11 @@ export async function kairoBench(
     });
 
     framework.cleanup();
-    if (globalThis.gc) gc!(), gc!();
+    possiblelyGC();
 
     logPerfResult({
       framework: framework.name,
-      test: c.name,
+      test: `kairo.${c.name}`,
       time: timing.time,
     });
   }

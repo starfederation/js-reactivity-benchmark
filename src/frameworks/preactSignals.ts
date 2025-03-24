@@ -1,23 +1,19 @@
-import { ReactiveFramework } from "../util/reactiveFramework";
 import { batch, computed, effect, signal } from "@preact/signals";
+import { ReactiveFramework } from "../util/reactiveFramework";
 
 let toCleanup: (() => void)[] = [];
 export const preactSignalFramework: ReactiveFramework = {
+  type: "inline",
   name: "Preact Signals",
   signal: (initialValue) => {
     const s = signal(initialValue);
-    return {
-      write: (v) => (s.value = v),
-      read: () => s.value,
-    };
+    return s;
   },
-  computed: (fn) => {
+  computed: (_, fn) => {
     const c = computed(fn);
-    return {
-      read: () => c.value,
-    };
+    return c;
   },
-  effect: (fn) => toCleanup.push(effect(fn)),
+  effect: (_, fn) => toCleanup.push(effect(fn)),
   withBatch: (fn) => batch(fn),
   withBuild: (fn) => fn(),
   cleanup: () => {

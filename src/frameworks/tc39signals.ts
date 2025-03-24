@@ -1,24 +1,31 @@
-import { ReactiveFramework } from "../util/reactiveFramework";
 import { Signal } from "signal-polyfill";
+import { ReactiveFramework } from "../util/reactiveFramework";
 
 let toCleanup: (() => void)[] = [];
 
 export const tc39SignalsFramework: ReactiveFramework = {
+  type: "inline",
   name: "TC39 Signals Polyfill",
   signal: (initialValue) => {
     const s = new Signal.State(initialValue);
     return {
-      write: (v) => s.set(v),
-      read: () => s.get(),
+      get value() {
+        return s.get();
+      },
+      set value(v) {
+        s.set(v);
+      },
     };
   },
-  computed: (fn) => {
+  computed: (_, fn) => {
     const c = new Signal.Computed(fn);
     return {
-      read: () => c.get(),
+      get value() {
+        return c.get();
+      },
     };
   },
-  effect: (fn) => effect(fn),
+  effect: (_, fn) => effect(fn),
   withBatch: (fn) => {
     fn();
     processPending();

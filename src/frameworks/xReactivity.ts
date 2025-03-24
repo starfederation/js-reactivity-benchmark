@@ -1,28 +1,36 @@
-import { ReactiveFramework } from "../util/reactiveFramework";
 import {
-  flushSync,
   createEffect,
   createMemo,
   createRoot,
   createSignal,
+  flushSync,
 } from "@solidjs/signals";
+import { ReactiveFramework } from "../util/reactiveFramework";
 
 export const xReactivityFramework: ReactiveFramework = {
+  type: "inline",
   name: "x-reactivity",
   signal: (initialValue) => {
+    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     const [getter, setter] = createSignal(initialValue as any);
     return {
-      write: (v) => setter(v as any),
-      read: () => getter(),
+      get value() {
+        return getter();
+      },
+      set value(v) {
+        setter(v);
+      },
     };
   },
-  computed: (fn) => {
+  computed: (_, fn) => {
     const memo = createMemo(fn);
     return {
-      read: () => memo(),
+      get value() {
+        return memo();
+      },
     };
   },
-  effect: (fn) => createEffect(fn, () => {}),
+  effect: (_, fn) => createEffect(fn, () => { }),
   withBatch: (fn) => {
     fn();
     flushSync();
@@ -32,5 +40,5 @@ export const xReactivityFramework: ReactiveFramework = {
       xReactivityFramework.cleanup = dispose;
       return fn();
     }),
-  cleanup: () => {},
+  cleanup: () => { },
 };

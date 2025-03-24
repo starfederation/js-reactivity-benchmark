@@ -1,37 +1,76 @@
 import { Counter } from "../../util/counter";
-import { ReactiveFramework } from "../../util/reactiveFramework";
+import type { ReactiveFramework } from "../../util/reactiveFramework";
 
 /** worst case. */
 export function unstable(bridge: ReactiveFramework) {
-  let head = bridge.signal(0);
-  const double = bridge.computed(() => head.read() * 2);
-  const inverse = bridge.computed(() => -head.read());
-  let current = bridge.computed(() => {
-    let result = 0;
-    for (let i = 0; i < 20; i++) {
-      result += head.read() % 2 ? double.read() : inverse.read();
-    }
-    return result;
-  });
+	switch (bridge.type) {
+		case "inline": {
+			const head = bridge.signal(0);
+			const double = bridge.computed([], () => head.value * 2);
+			const inverse = bridge.computed([], () => -head.value);
+			const current = bridge.computed([], () => {
+				let result = 0;
+				for (let i = 0; i < 20; i++) {
+					result += head.value % 2 ? double.value : inverse.value;
+				}
+				return result;
+			});
 
-  let callCounter = new Counter();
-  bridge.effect(() => {
-    current.read();
-    callCounter.count++;
-  });
-  return () => {
-    bridge.withBatch(() => {
-      head.write(1);
-    });
-    console.assert(current.read() === 40);
-    const atleast = 100;
-    callCounter.count = 0;
-    for (let i = 0; i < 100; i++) {
-      bridge.withBatch(() => {
-        head.write(i);
-      });
-      // console.assert(current.read() === i % 2 ? i * 2 * 10 : i * -10);
-    }
-    console.assert(callCounter.count === atleast);
-  };
+			const callCounter = new Counter();
+			bridge.effect([], () => {
+				current.value;
+				callCounter.count++;
+			});
+			return () => {
+				bridge.withBatch(() => {
+					head.value = 1;
+				});
+				console.assert(current.value === 40);
+				// const atleast = 100;
+				callCounter.count = 0;
+				for (let i = 0; i < 100; i++) {
+					bridge.withBatch(() => {
+						head.value = i;
+					});
+					// console.assert(current.value === i % 2 ? i * 2 * 10 : i * -10);
+				}
+				// console.assert(callCounter.count === atleast);
+			};
+		}
+		case "pure": {
+			const head = bridge.signal(0);
+			const double = bridge.computed([head], (h) => h * 2);
+			const inverse = bridge.computed([head], (h) => -h);
+			const current = bridge.computed(
+				[head, double, inverse],
+				(h, dbl, inv) => {
+					let result = 0;
+					for (let i = 0; i < 20; i++) {
+						result += h % 2 ? dbl : inv;
+					}
+					return result;
+				},
+			);
+
+			const callCounter = new Counter();
+			bridge.effect([current], () => {
+				callCounter.count++;
+			});
+			return () => {
+				bridge.withBatch(() => {
+					head.value = 1;
+				});
+				console.assert(current.value === 40);
+				// const atleast = 100;
+				callCounter.count = 0;
+				for (let i = 0; i < 100; i++) {
+					bridge.withBatch(() => {
+						head.value = i;
+					});
+					// console.assert(current.value === i % 2 ? i * 2 * 10 : i * -10);
+				}
+				// console.assert(callCounter.count === atleast);
+			};
+		}
+	}
 }

@@ -1,4 +1,3 @@
-import { ReactiveFramework } from "../util/reactiveFramework";
 import {
   batch,
   createEffect,
@@ -6,28 +5,37 @@ import {
   createRoot,
   createSignal,
 } from "solid-js/dist/solid.cjs";
+import { ReactiveFramework } from "../util/reactiveFramework";
 
 export const solidFramework: ReactiveFramework = {
+  type: "inline",
   name: "SolidJS",
-  signal: (initialValue) => {
+  signal: <T>(initialValue: T) => {
     const [getter, setter] = createSignal(initialValue);
     return {
-      write: (v) => setter(v as any),
-      read: () => getter(),
+      set value(v) {
+        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+        setter(v as any);
+      },
+      get value() {
+        return getter();
+      },
     };
   },
-  computed: (fn) => {
+  computed: (_, fn) => {
     const memo = createMemo(fn);
     return {
-      read: () => memo(),
+      get value() {
+        return memo();
+      },
     };
   },
-  effect: (fn) => createEffect(fn),
+  effect: (_, fn) => createEffect(fn),
   withBatch: (fn) => batch(fn),
   withBuild: (fn) =>
     createRoot((dispose) => {
       solidFramework.cleanup = dispose;
       return fn();
     }),
-  cleanup: () => {},
+  cleanup: () => { },
 };

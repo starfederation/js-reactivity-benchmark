@@ -11,21 +11,28 @@ import * as $ from "svelte/internal/client";
 // benchmark suite regardless.
 
 export const svelteFramework: ReactiveFramework = {
+  type: "inline",
   name: "Svelte v5",
   signal: (initialValue) => {
     const s = $.state(initialValue);
     return {
-      write: (v) => $.set(s, v),
-      read: () => $.get(s),
+      get value() {
+        return $.get(s);
+      },
+      set value(v) {
+        $.set(s, v);
+      },
     };
   },
-  computed: (fn) => {
+  computed: (_, fn) => {
     const c = $.derived(fn);
     return {
-      read: () => $.get(c),
+      get value() {
+        return $.get(c);
+      },
     };
   },
-  effect: (fn) => {
+  effect: (_, fn) => {
     $.render_effect(fn);
   },
   withBatch: (fn) => $.flush(fn),
@@ -34,7 +41,8 @@ export const svelteFramework: ReactiveFramework = {
     svelteFramework.cleanup = $.effect_root(() => {
       res = fn();
     });
+    // biome-ignore lint/style/noNonNullAssertion: <explanation>
     return res!;
   },
-  cleanup: () => {},
+  cleanup: () => { },
 };

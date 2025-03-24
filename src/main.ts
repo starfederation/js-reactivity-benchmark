@@ -12,7 +12,7 @@ function logLine(line: string): void {
   pre.innerText += line + "\n";
 }
 
-function logPerfResult(result: PerfResult): void {
+export function logPerfResult(result: PerfResult): void {
   logLine(formatPerfResult(result));
 }
 

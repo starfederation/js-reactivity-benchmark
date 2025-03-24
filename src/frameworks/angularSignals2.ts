@@ -1,14 +1,14 @@
-import { ReactiveFramework } from "../util/reactiveFramework";
 import {
-  signal,
   computed,
   effect,
+  EffectRef,
   Injector,
+  signal,
+  untracked,
   ɵChangeDetectionScheduler,
   ɵEffectScheduler,
-  untracked,
-  EffectRef,
 } from "@angular/core";
+import { ReactiveFramework } from "../util/reactiveFramework";
 
 interface SchedulableEffect {
   run(): void;
@@ -47,7 +47,7 @@ export class ArrayEffectScheduler implements ɵEffectScheduler {
 const scheduler = new ArrayEffectScheduler();
 const injector = Injector.create({
   providers: [
-    { provide: ɵChangeDetectionScheduler, useValue: { notify() {} } },
+    { provide: ɵChangeDetectionScheduler, useValue: { notify() { } } },
     { provide: ɵEffectScheduler, useValue: scheduler },
   ],
 });
@@ -56,21 +56,28 @@ const injectorObj = { injector };
 let toCleanup: EffectRef[] = [];
 
 export const angularFramework: ReactiveFramework = {
+  type: "inline",
   name: "@angular/signal2",
   signal: (initialValue) => {
     const s = signal(initialValue);
     return {
-      write: (v) => s.set(v),
-      read: () => s(),
+      get value() {
+        return s();
+      },
+      set value(v) {
+        s.set(v);
+      },
     };
   },
-  computed: (fn) => {
+  computed: (_, fn) => {
     const c = computed(fn);
     return {
-      read: () => c(),
+      get value() {
+        return c();
+      },
     };
   },
-  effect: (fn) => {
+  effect: (_, fn) => {
     toCleanup.push(effect(fn, injectorObj));
   },
   withBatch: (fn) => {
@@ -83,6 +90,7 @@ export const angularFramework: ReactiveFramework = {
       res = untracked(fn);
     }, injectorObj);
     scheduler.flush();
+    // biome-ignore lint/style/noNonNullAssertion: <explanation>
     return res!;
   },
   cleanup: () => {

@@ -1,29 +1,66 @@
-import { ReactiveFramework } from "../../util/reactiveFramework";
+import type { ReactiveFramework } from "../../util/reactiveFramework";
 import { busy } from "./util";
 
 /** avoidable change propagation  */
 export function avoidablePropagation(bridge: ReactiveFramework) {
-  let head = bridge.signal(0);
-  let computed1 = bridge.computed(() => head.read());
-  let computed2 = bridge.computed(() => (computed1.read(), 0));
-  let computed3 = bridge.computed(() => (busy(), computed2.read() + 1)); // heavy computation
-  let computed4 = bridge.computed(() => computed3.read() + 2);
-  let computed5 = bridge.computed(() => computed4.read() + 3);
-  bridge.effect(() => {
-    computed5.read();
-    busy(); // heavy side effect
-  });
+	switch (bridge.type) {
+		case "inline": {
+			const head = bridge.signal(0);
+			const computed1 = bridge.computed([], () => head.value);
+			const computed2 = bridge.computed([], () => {
+				computed1.value;
+				return 0;
+			});
+			const computed3 = bridge.computed([], () => {
+				busy();
+				return computed2.value + 1;
+			}); // heavy computation
+			const computed4 = bridge.computed([], () => computed3.value + 2);
+			const computed5 = bridge.computed([], () => computed4.value + 3);
+			bridge.effect([], () => {
+				computed5.value;
+				busy(); // heavy side effect
+			});
 
-  return () => {
-    bridge.withBatch(() => {
-      head.write(1);
-    });
-    console.assert(computed5.read() === 6);
-    for (let i = 0; i < 1000; i++) {
-      bridge.withBatch(() => {
-        head.write(i);
-      });
-      console.assert(computed5.read() === 6);
-    }
-  };
+			return () => {
+				bridge.withBatch(() => {
+					head.value = 1;
+				});
+				console.assert(computed5.value === 6);
+				for (let i = 0; i < 1000; i++) {
+					bridge.withBatch(() => {
+						head.value = i;
+					});
+					console.assert(computed5.value === 6);
+				}
+			};
+		}
+		case "pure": {
+			const head = bridge.signal(0);
+			const computed1 = bridge.computed([head], () => { });
+			const computed2 = bridge.computed([computed1], () => 0);
+			const computed3 = bridge.computed([computed2], (c2) => {
+				busy();
+				return c2 + 1;
+			}); // heavy computation
+			const computed4 = bridge.computed([computed3], (c3) => c3 + 2);
+			const computed5 = bridge.computed([computed4], (c4) => c4 + 3);
+			bridge.effect([computed5], () => {
+				busy(); // heavy side effect
+			});
+
+			return () => {
+				bridge.withBatch(() => {
+					head.value = 1;
+				});
+				console.assert(computed5.value === 6);
+				for (let i = 0; i < 1000; i++) {
+					bridge.withBatch(() => {
+						head.value = i;
+					});
+					console.assert(computed5.value === 6);
+				}
+			};
+		}
+	}
 }

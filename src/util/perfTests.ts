@@ -37,3 +37,19 @@ export function verifyBenchResult(
     );
   }
 }
+
+// Extend globalThis to include gc
+declare global {
+  interface Global {
+    gc?: () => void;
+  }
+
+  var gc: (() => void) | undefined;
+}
+
+export function possiblelyGC() {
+  if (globalThis?.gc) {
+    globalThis.gc();
+    globalThis.gc();
+  }
+}

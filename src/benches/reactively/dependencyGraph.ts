@@ -50,9 +50,9 @@ export function makeGraph(
     const leaves = rows[rows.length - 1];
     const skipCount = Math.round(leaves.length * (1 - readFraction));
     const readLeaves = removeElems(leaves, skipCount, rand);
-    framework.effect(() => {
+    framework.effect(readLeaves, () => {
       for (const leaf of readLeaves) {
-        leaf.read();
+        leaf.value;
       }
     });
 
@@ -76,14 +76,14 @@ export function runGraph(
   for (let i = 0; i < iterations; i++) {
     framework.withBatch(() => {
       const sourceDex = i % sources.length;
-      sources[sourceDex].write(i + sourceDex);
+      sources[sourceDex].value = i + sourceDex;
     });
     for (const leaf of readLeaves) {
-      leaf.read();
+      leaf.value;
     }
   }
 
-  const sum = readLeaves.reduce((total, leaf) => leaf.read() + total, 0);
+  const sum = readLeaves.reduce((total, leaf) => leaf.value + total, 0);
   return sum;
 }
 
@@ -141,33 +141,32 @@ function makeRow(
     const staticNode = random() < staticFraction;
     if (staticNode) {
       // static node, always reference sources
-      return framework.computed(() => {
+      return framework.computed(mySources, () => {
         counter.count++;
 
         let sum = 0;
         for (const src of mySources) {
-          sum += src.read();
+          sum += src.value;
         }
         return sum;
       });
-    } else {
-      // dynamic node, drops one of the sources depending on the value of the first element
-      const first = mySources[0];
-      const tail = mySources.slice(1);
-      const node = framework.computed(() => {
-        counter.count++;
-        let sum = first.read();
-        const shouldDrop = sum & 0x1;
-        const dropDex = sum % tail.length;
-
-        for (let i = 0; i < tail.length; i++) {
-          if (shouldDrop && i === dropDex) continue;
-          sum += tail[i].read();
-        }
-
-        return sum;
-      });
-      return node;
     }
+    // dynamic node, drops one of the sources depending on the value of the first element
+    const first = mySources[0];
+    const tail = mySources.slice(1);
+    const node = framework.computed([first, tail], () => {
+      counter.count++;
+      let sum = first.value;
+      const shouldDrop = sum & 0x1;
+      const dropDex = sum % tail.length;
+
+      for (let i = 0; i < tail.length; i++) {
+        if (shouldDrop && i === dropDex) continue;
+        sum += tail[i].value;
+      }
+
+      return sum;
+    });
+    return node;
   });
 }

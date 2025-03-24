@@ -1,5 +1,5 @@
 import { nextTick } from "./asyncUtil";
-import { TimingResult } from "./perfTests";
+import { possiblelyGC, TimingResult } from "./perfTests";
 
 /** benchmark a function n times, returning the fastest result and associated timing */
 export async function fastestTest<T>(
@@ -34,7 +34,7 @@ export function runTimed<T>(fn: () => T): TimedResult<T> {
 
 /** run a function, reporting the wall clock time and garbage collection time. */
 async function runTracked<T>(fn: () => T): Promise<TimingResult<T>> {
-  if (globalThis.gc) gc!(), gc!();
+  possiblelyGC();
   let out = runTimed(fn);
   const { result, time } = out;
   return { result, timing: { time } };

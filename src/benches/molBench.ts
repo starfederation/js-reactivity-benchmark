@@ -1,7 +1,7 @@
 import { nextTick } from "../util/asyncUtil";
 import { fastestTest } from "../util/benchRepeat";
-import { PerfResultCallback } from "../util/perfLogging";
-import { ReactiveFramework } from "../util/reactiveFramework";
+import type { PerfResultCallback } from "../util/perfLogging";
+import type { ReactiveFramework } from "../util/reactiveFramework";
 
 function fib(n: number): number {
   if (n < 2) return 1;
@@ -18,39 +18,76 @@ export async function molBench(
   framework: ReactiveFramework,
   logPerfResult: PerfResultCallback,
 ) {
-  let res = [];
+  const res = [];
   const iter = framework.withBuild(() => {
-    const A = framework.signal(0);
-    const B = framework.signal(0);
-    const C = framework.computed(() => (A.read() % 2) + (B.read() % 2));
-    const D = framework.computed(() =>
-      numbers.map((i) => ({ x: i + (A.read() % 2) - (B.read() % 2) })),
-    );
-    const E = framework.computed(() =>
-      hard(C.read() + A.read() + D.read()[0].x, "E"),
-    );
-    const F = framework.computed(() => hard(D.read()[2].x || B.read(), "F"));
-    const G = framework.computed(
-      () => C.read() + (C.read() || E.read() % 2) + D.read()[4].x + F.read(),
-    );
-    // H:
-    framework.effect(() => res.push(hard(G.read(), "H")));
-    // I:
-    framework.effect(() => res.push(G.read()));
-    // J:
-    framework.effect(() => res.push(hard(F.read(), "J")));
+    switch (framework.type) {
+      case "inline": {
+        const A = framework.signal(0);
+        const B = framework.signal(0);
+        const C = framework.computed([], () => (A.value % 2) + (B.value % 2));
+        const D = framework.computed([], () =>
+          numbers.map((i) => ({ x: i + (A.value % 2) - (B.value % 2) })),
+        );
+        const E = framework.computed([], () =>
+          hard(C.value + A.value + D.value[0].x, "E"),
+        );
+        const F = framework.computed([], () =>
+          hard(D.value[2].x || B.value, "F"),
+        );
+        const G = framework.computed(
+          [],
+          () => C.value + (C.value || E.value % 2) + D.value[4].x + F.value,
+        );
 
-    return (i: number) => {
-      res.length = 0;
-      framework.withBatch(() => {
-        B.write(1);
-        A.write(1 + i * 2);
-      });
-      framework.withBatch(() => {
-        A.write(2 + i * 2);
-        B.write(2);
-      });
-    };
+        framework.effect([], () => res.push(hard(G.value, "H")));
+        framework.effect([], () => res.push(G.value));
+        framework.effect([], () => res.push(hard(F.value, "J")));
+
+        return (i: number) => {
+          res.length = 0;
+          framework.withBatch(() => {
+            B.value = 1;
+            A.value = 1 + i * 2;
+          });
+          framework.withBatch(() => {
+            A.value = 2 + i * 2;
+            B.value = 2;
+          });
+        };
+      }
+      case "pure": {
+        const A = framework.signal(0);
+        const B = framework.signal(0);
+        const C = framework.computed([A, B], (a, b) => (a % 2) + (b % 2));
+        const D = framework.computed([A, B], (a, b) =>
+          numbers.map((i) => ({ x: i + (a % 2) - (b % 2) })),
+        );
+        const E = framework.computed([C, A, D], (c, a, d) =>
+          hard(c + a + d[0].x, "E"),
+        );
+        const F = framework.computed([D, B], (d, b) => hard(d[2].x || b, "F"));
+        const G = framework.computed(
+          [C, E, D, F],
+          (c, e, d, f) => c + (c || e % 2) + d[4].x + f,
+        );
+
+        framework.effect([G], (g: number) => res.push(hard(g, "H")));
+        framework.effect([G], (g: number) => res.push(g));
+        framework.effect([F], (f: number) => res.push(hard(f, "J")));
+
+        return (i: number) => {
+          res.length = 0;
+          framework.withBatch(() => {
+            B.value = 1;
+            A.value = 1 + i * 2;
+          });
+          framework.withBatch(() => {
+            A.value = 2 + i * 2;
+            B.value = 2;
+          });
+        };
+      }
+    }
   });
 
   iter(0);
@@ -66,7 +103,10 @@ export async function molBench(
   });
 
   framework.cleanup();
-  if (globalThis.gc) gc!(), gc!();
+  if (globalThis.gc) {
+    gc?.();
+    gc?.();
+  }
 
   logPerfResult({
     framework: framework.name,

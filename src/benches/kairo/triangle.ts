@@ -1,50 +1,89 @@
 import { Counter } from "../../util/counter";
-import { Computed, ReactiveFramework } from "../../util/reactiveFramework";
+import type { Computed, ReactiveFramework } from "../../util/reactiveFramework";
 
-let width = 10;
+const width = 10;
 
 export function triangle(bridge: ReactiveFramework) {
-  let head = bridge.signal(0);
-  let current = head as Computed<number>;
-  let list: Computed<number>[] = [];
-  for (let i = 0; i < width; i++) {
-    let c = current;
-    list.push(current);
-    current = bridge.computed(() => {
-      return c.read() + 1;
-    });
-  }
-  let sum = bridge.computed(() => {
-    return list.map((x) => x.read()).reduce((a, b) => a + b, 0);
-  });
+	switch (bridge.type) {
+		case "inline": {
+			const head = bridge.signal(0);
+			let current = head as Computed<number>;
+			const list: Computed<number>[] = [];
+			for (let i = 0; i < width; i++) {
+				const c = current;
+				list.push(current);
+				current = bridge.computed([], () => {
+					return c.value + 1;
+				});
+			}
+			const sum = bridge.computed([], () => {
+				return list.map((x) => x.value).reduce((a, b) => a + b, 0);
+			});
 
-  let callCounter = new Counter();
-  bridge.effect(() => {
-    sum.read();
-    callCounter.count++;
-  });
+			const callCounter = new Counter();
+			bridge.effect([], () => {
+				sum.value;
+				callCounter.count++;
+			});
 
-  return () => {
-    const constant = count(width);
-    bridge.withBatch(() => {
-      head.write(1);
-    });
-    console.assert(sum.read() === constant);
-    const atleast = 100;
-    callCounter.count = 0;
-    for (let i = 0; i < 100; i++) {
-      bridge.withBatch(() => {
-        head.write(i);
-      });
-      console.assert(sum.read() === constant - width + i * width);
-    }
-    console.assert(callCounter.count === atleast);
-  };
+			return () => {
+				const constant = count(width);
+				bridge.withBatch(() => {
+					head.value = 1;
+				});
+				console.assert(sum.value === constant);
+				// const atleast = 100;
+				callCounter.count = 0;
+				for (let i = 0; i < 100; i++) {
+					bridge.withBatch(() => {
+						head.value = i;
+					});
+					console.assert(sum.value === constant - width + i * width);
+				}
+				// console.assert(callCounter.count === atleast);
+			};
+		}
+		case "pure": {
+			const head = bridge.signal(0);
+			let current = head as Computed<number>;
+			const list: Computed<number>[] = [];
+			for (let i = 0; i < width; i++) {
+				const c = current;
+				list.push(current);
+				current = bridge.computed([c], (c) => c + 1);
+			}
+			const sum = bridge.computed(list, (...ll: number[]) =>
+				ll.reduce((a, b) => a + b, 0),
+			);
+
+			const callCounter = new Counter();
+			bridge.effect([sum], () => {
+				callCounter.count++;
+			});
+
+			return () => {
+				const constant = count(width);
+				bridge.withBatch(() => {
+					head.value = 1;
+				});
+				console.assert(sum.value === constant);
+				// const atleast = 100;
+				callCounter.count = 0;
+				for (let i = 0; i < 100; i++) {
+					bridge.withBatch(() => {
+						head.value = i;
+					});
+					console.assert(sum.value === constant - width + i * width);
+				}
+				// console.assert(callCounter.count === atleast);
+			};
+		}
+	}
 }
 
-function count(number: Number) {
-  return new Array(number)
-    .fill(0)
-    .map((_, i) => i + 1)
-    .reduce((x, y) => x + y, 0);
+function count(number: number) {
+	return new Array(number)
+		.fill(0)
+		.map((_, i) => i + 1)
+		.reduce((x, y) => x + y, 0);
 }

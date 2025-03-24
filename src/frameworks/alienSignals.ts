@@ -10,21 +10,28 @@ import { ReactiveFramework } from "../util/reactiveFramework";
 let toCleanup: (() => void)[] = [];
 
 export const alienFramework: ReactiveFramework = {
+  type: "inline",
   name: "alien-signals",
   signal: (initial) => {
     const data = signal(initial);
     return {
-      read: () => data(),
-      write: (v) => data(v),
+      get value() {
+        return data();
+      },
+      set value(v) {
+        data(v);
+      },
     };
   },
-  computed: (fn) => {
+  computed: (_, fn) => {
     const c = computed(fn);
     return {
-      read: () => c(),
+      get value() {
+        return c();
+      },
     };
   },
-  effect: (fn) => toCleanup.push(effect(fn)),
+  effect: (_, fn) => toCleanup.push(effect(fn)),
   withBatch: (fn) => {
     startBatch();
     fn();
