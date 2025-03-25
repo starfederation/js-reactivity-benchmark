@@ -24,48 +24,48 @@ That said, there's learning here to improve performance of all the frameworks.
 
 | framework      | test                       | time   |
 | -------------- | -------------------------- | ------ |
-| alien-signals  | kairo.avoidablePropagation | 155.80 |
-| alien-signals  | kairo.broadPropagation     | 260.60 |
-| alien-signals  | kairo.deepPropagation      | 82.20  |
-| alien-signals  | kairo.diamond              | 202.80 |
-| alien-signals  | kairo.mux                  | 219.80 |
-| alien-signals  | kairo.repeatedObservers    | 58.90  |
-| alien-signals  | kairo.triangle             | 67.60  |
-| alien-signals  | kairo.unstable             | 96.00  |
-| datastar       | kairo.avoidablePropagation | 276.60 |
-| datastar       | kairo.broadPropagation     | 242.80 |
-| datastar       | kairo.deepPropagation      | 96.80  |
-| datastar       | kairo.diamond              | 334.40 |
-| datastar       | kairo.mux                  | 340.90 |
-| datastar       | kairo.repeatedObservers    | 9.20   |
-| datastar       | kairo.triangle             | 84.00  |
-| datastar       | kairo.unstable             | 41.80  |
-| Preact Signals | kairo.avoidablePropagation | 138.80 |
-| Preact Signals | kairo.broadPropagation     | 228.80 |
-| Preact Signals | kairo.deepPropagation      | 95.40  |
-| Preact Signals | kairo.diamond              | 210.80 |
-| Preact Signals | kairo.mux                  | 225.60 |
-| Preact Signals | kairo.repeatedObservers    | 52.20  |
-| Preact Signals | kairo.triangle             | 68.60  |
-| Preact Signals | kairo.unstable             | 71.90  |
-| @reactively    | kairo.avoidablePropagation | 239.50 |
-| @reactively    | kairo.broadPropagation     | 272.90 |
-| @reactively    | kairo.deepPropagation      | 110.70 |
-| @reactively    | kairo.diamond              | 225.90 |
-| @reactively    | kairo.mux                  | 227.00 |
-| @reactively    | kairo.repeatedObservers    | 65.80  |
-| @reactively    | kairo.triangle             | 70.10  |
-| @reactively    | kairo.unstable             | 140.40 |
-| Svelte v5      | kairo.avoidablePropagation | 778.80 |
-| Svelte v5      | kairo.broadPropagation     | 523.50 |
-| Svelte v5      | kairo.deepPropagation      | 184.70 |
-| Svelte v5      | kairo.diamond              | 530.20 |
-| Svelte v5      | kairo.mux                  | 276.00 |
-| Svelte v5      | kairo.repeatedObservers    | 95.50  |
-| Svelte v5      | kairo.triangle             | 132.90 |
-| Svelte v5      | kairo.unstable             | 150.50 |
-| alien-signals  | molBench                   | 400.60 |
-| datastar       | molBench                   | 16.50  |
-| Preact Signals | molBench                   | 395.30 |
-| @reactively    | molBench                   | 396.00 |
-| Svelte v5      | molBench                   | 416.20 |
+| alien-signals  | kairo.avoidablePropagation | 161.90 |
+| alien-signals  | kairo.broadPropagation     | 267.80 |
+| alien-signals  | kairo.deepPropagation      | 88.40  |
+| alien-signals  | kairo.diamond              | 208.60 |
+| alien-signals  | kairo.mux                  | 214.50 |
+| alien-signals  | kairo.repeatedObservers    | 59.10  |
+| alien-signals  | kairo.triangle             | 66.90  |
+| alien-signals  | kairo.unstable             | 94.00  |
+| datastar       | kairo.avoidablePropagation | 167.00 |
+| datastar       | kairo.broadPropagation     | 317.30 |
+| datastar       | kairo.deepPropagation      | 57.30  |
+| datastar       | kairo.diamond              | 123.50 |
+| datastar       | kairo.mux                  | 196.70 |
+| datastar       | kairo.repeatedObservers    | 12.00  |
+| datastar       | kairo.triangle             | 41.30  |
+| datastar       | kairo.unstable             | 17.90  |
+| Preact Signals | kairo.avoidablePropagation | 115.70 |
+| Preact Signals | kairo.broadPropagation     | 198.70 |
+| Preact Signals | kairo.deepPropagation      | 80.30  |
+| Preact Signals | kairo.diamond              | 145.10 |
+| Preact Signals | kairo.mux                  | 193.30 |
+| Preact Signals | kairo.repeatedObservers    | 16.50  |
+| Preact Signals | kairo.triangle             | 56.10  |
+| Preact Signals | kairo.unstable             | 31.10  |
+| @reactively    | kairo.avoidablePropagation | 240.50 |
+| @reactively    | kairo.broadPropagation     | 274.80 |
+| @reactively    | kairo.deepPropagation      | 119.10 |
+| @reactively    | kairo.diamond              | 219.30 |
+| @reactively    | kairo.mux                  | 218.70 |
+| @reactively    | kairo.repeatedObservers    | 63.20  |
+| @reactively    | kairo.triangle             | 70.60  |
+| @reactively    | kairo.unstable             | 136.20 |
+| Svelte v5      | kairo.avoidablePropagation | 786.70 |
+| Svelte v5      | kairo.broadPropagation     | 423.40 |
+| Svelte v5      | kairo.deepPropagation      | 172.80 |
+| Svelte v5      | kairo.diamond              | 541.20 |
+| Svelte v5      | kairo.mux                  | 278.80 |
+| Svelte v5      | kairo.repeatedObservers    | 95.70  |
+| Svelte v5      | kairo.triangle             | 130.30 |
+| Svelte v5      | kairo.unstable             | 142.20 |
+| alien-signals  | molBench                   | 401.00 |
+| datastar       | molBench                   | 475.30 |
+| Preact Signals | molBench                   | 406.50 |
+| @reactively    | molBench                   | 436.60 |
+| Svelte v5      | molBench                   | 413.10 |

@@ -96,7 +96,7 @@ export function signal<T>(value: T) {
 export class Derived<O> extends Dependency implements Subscriber {
     private v!: O; // value
     private d = true; // dirty
-    private vs: number = 0; // version sum
+    private vs = 0; // version sum
 
     constructor(
         public dd: Dependency[],

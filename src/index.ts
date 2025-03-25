@@ -24,11 +24,9 @@ export async function runTests(
     await promiseDelay(2000);
   }
 
-  for (let i = 0; i < 10; i++) {
-    for (const { framework } of frameworkInfo) {
-      await molBench(framework, logPerfResult);
-      await promiseDelay(2000);
-    }
+  for (const { framework } of frameworkInfo) {
+    await molBench(framework, logPerfResult);
+    await promiseDelay(2000);
   }
 
   // Disabled because it doesn't cleanup and read computeds only outside of withBuild
