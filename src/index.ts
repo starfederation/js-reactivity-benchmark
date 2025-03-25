@@ -1,8 +1,9 @@
 // import { sbench } from "./benches/sBench";
+import { kairoBench } from "./benches/kairoBench";
 import { molBench } from "./benches/molBench";
 import { promiseDelay } from "./util/asyncUtil";
 import { FrameworkInfo } from "./util/frameworkTypes";
-import { PerfResultCallback } from "./util/perfLogging";
+import type { PerfResultCallback } from "./util/perfLogging";
 
 export {
   formatPerfResult,
@@ -18,10 +19,10 @@ export async function runTests(
 ) {
   await promiseDelay(0);
 
-  // for (const { framework } of frameworkInfo) {
-  //   await kairoBench(framework, logPerfResult);
-  //   await promiseDelay(2000);
-  // }
+  for (const { framework } of frameworkInfo) {
+    await kairoBench(framework, logPerfResult);
+    await promiseDelay(2000);
+  }
 
   for (let i = 0; i < 10; i++) {
     for (const { framework } of frameworkInfo) {

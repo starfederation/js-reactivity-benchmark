@@ -1,16 +1,16 @@
-import { FrameworkInfo } from "./util/frameworkTypes";
+// import { sFramework } from "./frameworks/inactive/s";
+// import { usignalFramework } from "./frameworks/inactive/uSignal";
+// import { vueReactivityFramework } from "./frameworks/inactive/vueReactivity";
+import { alienFramework } from "./frameworks/alienSignals";
+import { datastarFramework } from "./frameworks/datastar";
 // import { compostateFramework } from "./frameworks/inactive/compostate";
 // import { kairoFramework } from "./frameworks/inactive/kairo";
 // import { mobxFramework } from "./frameworks/inactive/mobx";
 // import { obyFramework } from "./frameworks/inactive/oby";
 import { preactSignalFramework } from "./frameworks/preactSignals";
 import { reactivelyFramework } from "./frameworks/reactively";
-// import { sFramework } from "./frameworks/inactive/s";
-// import { usignalFramework } from "./frameworks/inactive/uSignal";
-// import { vueReactivityFramework } from "./frameworks/inactive/vueReactivity";
-import { alienFramework } from "./frameworks/alienSignals";
-import { datastarFramework } from "./frameworks/datastar";
 import { svelteFramework } from "./frameworks/svelte";
+import type { FrameworkInfo } from "./util/frameworkTypes";
 // import { tc39SignalsFramework } from "./frameworks/tc39signals";
 
 export const frameworkInfo: FrameworkInfo[] = [
